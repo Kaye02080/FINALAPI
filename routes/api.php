@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
    Route::post('/deposit', [DepositMoneyController::class, 'deposit']);
   Route::get('/transactions', [TransactionController::class, 'getAllTransactions']);
     Route::put('/transaction/{id}', [TransactionController::class, 'update']);
-    Route::delete('/transaction/{id}', [TransactionController::class, 'destroy']);
+   Route::delete('/delete-transaction/{id}', [TransactionController::class, 'destroy']);
 
     Route::post('/logout', [AuthenticationController::class, 'logout']);
 });
