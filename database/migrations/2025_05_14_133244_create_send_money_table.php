@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
             $table->decimal('amount', 10, 2);
+            $table->string('currency', 3); // New currency field
             $table->string('transaction_type'); // e.g., 'send' or 'deposit'
             $table->string('reference_number')->nullable();
             $table->timestamps();

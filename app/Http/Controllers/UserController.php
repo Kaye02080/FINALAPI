@@ -6,15 +6,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+
 class UserController extends Controller
 {
-    public function getUserById($id)
+  public function getAllUsers()
 {
-    $user = User::find($id);
-    if (!$user) {
-        return response()->json(['error' => 'User not found'], 404);
-    }
-    return response()->json($user);
+    $users = User::all(); // You can also use ->select(...) to limit fields
+    return response()->json($users);
 }
 
     public function addUser(Request $request)
@@ -90,4 +88,19 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User deleted successfully']);
     }
+
+    public function getBalance($id)
+{
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
+    return response()->json([
+        'user_id' => $user->id,
+        'balance' => $user->balance
+    ]);
+}
+
 }

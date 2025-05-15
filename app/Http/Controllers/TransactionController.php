@@ -9,15 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends Controller
 {
-    public function getUserTransactions($user_id)
-    {
-        // Get all transactions where user is sender or receiver
-        $transactions = SendMoney::where('sender_id', $user_id)
-                                ->orWhere('receiver_id', $user_id)
-                                ->get();
+  public function getAllTransactions()
+{
+    $transactions = SendMoney::with(['sender', 'receiver'])->get();
 
-        return response()->json($transactions);
-    }
+    return response()->json($transactions);
+}
+
 
     public function update(Request $request, $id)
 {

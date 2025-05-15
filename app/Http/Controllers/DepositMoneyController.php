@@ -39,6 +39,7 @@ class DepositMoneyController extends Controller
             $transaction->sender_id = null; // or 0, or system user id if you want
             $transaction->receiver_id = $user->id;
             $transaction->amount = $request->amount;
+            $transaction->currency = $request->currency;
             $transaction->transaction_type = 'deposit';
             $transaction->reference_number = uniqid('dep_'); // optional unique ref
             $transaction->save();
