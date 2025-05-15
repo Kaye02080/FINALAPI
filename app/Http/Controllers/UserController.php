@@ -4,84 +4,90 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    public function getUsers(){
-    $users = User::with('role', 'userStatus')->get();
-
-    return response()->json(['users' => $users]);
-}
-
-
-    public function addUser(Request $request){
-    $request->validate([
-        'first_name' => ['required', 'string', 'max:255'],
-        'middle_name' => ['nullable', 'string', 'max:255'],
-        'last_name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'email', 'max:255', 'unique:users'],
-        'password' => ['required', 'string', 'min:8'],
-        'role_id' => ['required', 'exists:roles,id'],
-        'user_status_id' => ['required', 'exists:user_statuses,id'],
-        'balance' => ['required', 'numeric', 'min:0'],  // Add balance validation
-    ]);
-
-    $user = User::create([
-        'first_name' => $request->first_name,
-        'middle_name' => $request->middle_name,
-        'last_name' => $request->last_name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role_id' => $request->role_id,
-        'user_status_id' => $request->user_status_id,
-        'balance' => $request->balance, // Set balance when creating user
-    ]);
-
-    return response()->json(['message' => 'User successfully created!', 'user' => $user]);
-}
-
-
-   public function editUser(Request $request, $id){
-    $request->validate([
-        'first_name' => ['required', 'string', 'max:255'],
-        'middle_name' => ['nullable', 'string', 'max:255'],
-        'last_name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $id],
-        'role_id' => ['required', 'exists:roles,id'],
-        'user_status_id' => ['required', 'exists:user_statuses,id'],
-        'balance' => ['required', 'numeric', 'min:0'],  // Add balance validation
-    ]);
-
+    public function getUserById($id)
+{
     $user = User::find($id);
+    if (!$user) {
+        return response()->json(['error' => 'User not found'], 404);
+    }
+    return response()->json($user);
+}
 
-    if(!$user){
-        return response()->json(['message' => 'User not found!'], 404);
+    public function addUser(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+           'first_name' => 'required|string|max:255',
+           'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            // add other validation rules here
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $user = User::create([
+           'first_name' => $request->first_name,
+        'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
+
+        return response()->json(['message' => 'User created successfully', 'user' => $user], 201);
     }
 
-    $user->update([
-        'first_name' => $request->first_name,
-        'middle_name' => $request->middle_name,
-        'last_name' => $request->last_name,
-        'email' => $request->email,
-        'role_id' => $request->role_id,
-        'user_status_id' => $request->user_status_id,
-        'balance' => $request->balance,  // Update balance
-    ]);
-
-    return response()->json(['message' => 'User successfully edited!', 'user' => $user]);
-}
-
-
-    public function deleteUser($id){
+    public function editUser(Request $request, $id)
+    {
         $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
 
-        if(!$user){
-            return response()->json(['message' => 'User not found!'], 404);
+        $validator = Validator::make($request->all(), [
+           'first_name' => 'sometimes|required|string|max:255',
+        'last_name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'password' => 'sometimes|string|min:6',
+            // add other validation rules here
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+         if ($request->has('first_name')) {
+        $user->first_name = $request->first_name;
+    }
+
+    if ($request->has('last_name')) {
+        $user->last_name = $request->last_name;
+    }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->has('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'User updated successfully', 'user' => $user]);
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
 
         $user->delete();
 
-        return response()->json(['message' => 'User successfully deleted!']);
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }

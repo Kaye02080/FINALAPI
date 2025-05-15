@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SendMoneyController;
-use App\Http\Controllers\API\DepositMoneyController;
+use App\Http\Controllers\DepositMoneyController;
+use App\Http\Controllers\TransactionController;
+ 
 
 /*
 |--------------------------------------------------------------------------
@@ -22,14 +24,16 @@ Route::post('/register', [AuthenticationController::class, 'register']);
 Route::post('/login', [AuthenticationController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/get-users', [UserController::class, 'getUsers']);
+    Route::get('/get-user/{id}', [UserController::class, 'getUserById']);
     Route::post('/add-user', [UserController::class, 'addUser']);
     Route::put('/edit-user/{id}', [UserController::class, 'editUser']);
-    Route::delete('/delete-user/{id}', [UserController::class, 'deleteUser']);
-
-   Route::post('/sendmoney', [SendMoneyController::class, 'send']);
-    Route::post('/deposit', [DepositMoneyController::class, 'store']);
-
+   Route::delete('/delete-user/{id}', [UserController::class, 'deleteUser']);
+   
+    Route::post('/sendmoney', [SendMoneyController::class, 'send']);
+   Route::post('/deposit', [DepositMoneyController::class, 'deposit']);
+   Route::get('/transaction/{user_id}', [TransactionController::class, 'getUserTransactions']);
+    Route::put('/transaction/{id}', [TransactionController::class, 'update']);
+    Route::delete('/transaction/{id}', [TransactionController::class, 'destroy']);
 
     Route::post('/logout', [AuthenticationController::class, 'logout']);
 });

@@ -56,9 +56,13 @@ class SendMoneyController extends Controller
 
         return response()->json(['message' => 'Money sent successfully!', 'transaction' => $transaction], 200);
     } catch (\Exception $e) {
-        \DB::rollBack();
-        return response()->json(['error' => 'Transaction failed. Please try again later.'], 500);
-    }
+    \DB::rollBack();
+    return response()->json([
+        'error' => 'Transaction failed. Please try again later.',
+        'message' => $e->getMessage(),  // show real error for debugging
+    ], 500);
+}
+
 }
 
 }
